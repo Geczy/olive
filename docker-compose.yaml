@@ -11,7 +11,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - pgdata:/var/lib/postgresql/data 777
+      - ./pgdata:/var/lib/postgresql/data
     networks:
       - olive-network
 
@@ -37,8 +37,8 @@ services:
     volumes:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
-      - downloads:/downloads
-      - config:/config
+      - ./downloads:/downloads
+      - ./config:/config
     networks:
       - olive-network
 
@@ -50,7 +50,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - config/default.conf:/etc/nginx/conf.d/default.conf
+      - ./config/default.conf:/etc/nginx/conf.d/default.conf
     networks:
       - olive-network
 
