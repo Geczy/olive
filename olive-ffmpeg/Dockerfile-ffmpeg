@@ -1,0 +1,11 @@
+# Use the existing olive-server image as the base image
+FROM luxcgo/olive:latest
+
+# Install ffmpeg using apk (Alpine package manager)
+RUN apk update && apk add ffmpeg
+
+# Cleanup to reduce image size
+RUN rm -rf /var/cache/apk/*
+
+# Start the original command from the olive-server image
+CMD ["./olive", "server", "--db-host", "olive-db:5432", "-l", "/downloads", "-s", "/downloads"]
