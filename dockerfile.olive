@@ -1,0 +1,42 @@
+# Build the Go Binary.
+FROM golang:1.20 as build_olive
+ENV CGO_ENABLED 0
+ARG BUILD_REF
+
+# Create the service directory and the copy the module files first and then
+# download the dependencies. If this doesn't change, we won't need to do this
+# again in future builds.
+# RUN mkdir /ctl
+# COPY go.* /ctl/
+# WORKDIR /ctl
+# RUN go mod download
+
+# Copy the source code into the container.
+COPY . /ctl
+
+# Build the binary.
+WORKDIR /ctl
+RUN go build -ldflags "-X github.com/go-olive/olive/command.build=${BUILD_REF}"
+
+# Run the Go Binary in Alpine.
+FROM alpine:3.17
+ENV OUTPUT_DIR="/downloads"
+ARG BUILD_DATE
+ARG BUILD_REF
+COPY --from=build_olive /ctl/olive /ctl/olive
+COPY --from=build_olive /ctl/zarf/streamlink/init.sh /ctl/init.sh
+WORKDIR /ctl
+RUN mkdir -p $OUTPUT_DIR && \
+	apk update && \
+	apk --no-cache add yt-dlp zsh tzdata && \
+	sh init.sh
+ENV TZ=Asia/Shanghai
+VOLUME $OUTPUT_DIR
+CMD ["./olive"]
+
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+	org.opencontainers.image.title="olive" \
+	org.opencontainers.image.authors="luxcgo <luxcgo@gmail.com>" \
+	org.opencontainers.image.source="https://github.com/go-olive/olive" \
+	org.opencontainers.image.revision="${BUILD_REF}" \
+	org.opencontainers.image.vendor="go-olive"
