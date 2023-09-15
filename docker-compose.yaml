@@ -16,15 +16,24 @@ services:
       - olive-network
 
   olive-server:
-    build:
-      context: ./olive-ffmpeg
-      dockerfile: Dockerfile-ffmpeg
+    image: luxcgo/olive:latest
     container_name: olive-server
     depends_on:
       - olive-db
     ports:
       - 127.0.0.1:3000:3000
       - 127.0.0.1:4000:4000
+    command:
+      [
+        "./olive",
+        "server",
+        "--db-host",
+        "olive-db:5432",
+        "-l",
+        "/downloads",
+        "-s",
+        "/downloads"
+      ]
     volumes:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
